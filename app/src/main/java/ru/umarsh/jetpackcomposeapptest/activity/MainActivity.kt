@@ -1,4 +1,4 @@
-package ru.umarsh.jetpackcomposeapptest
+package ru.umarsh.jetpackcomposeapptest.activity
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

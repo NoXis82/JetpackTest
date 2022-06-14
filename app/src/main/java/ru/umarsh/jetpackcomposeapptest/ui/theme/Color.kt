@@ -1,4 +1,4 @@
-package ru.umarsh.jetpackcomposeapptest.ui
+package ru.umarsh.jetpackcomposeapptest.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
