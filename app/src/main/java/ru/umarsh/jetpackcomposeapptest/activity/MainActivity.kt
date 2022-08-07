@@ -4,70 +4,49 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.unit.dp
-import ru.umarsh.jetpackcomposeapptest.ui.ComposeTheme
+import androidx.constraintlayout.compose.ChainStyle
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.ConstraintSet
+import androidx.constraintlayout.compose.Dimension
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            ComposeTheme {
-                Surface(color = MaterialTheme.colors.background) {
-                    Greeting(name = "Slava")
+            val constraints = ConstraintSet {
+                val greenBox = createRefFor("greenBox")
+                val redBox = createRefFor("redBox")
+                val guideline = createGuidelineFromTop(100.dp)
+
+                constrain(greenBox) {
+                    top.linkTo(guideline)
+                    start.linkTo(parent.start)
+                    width = Dimension.value(100.dp)
+                    height = Dimension.value(100.dp)
                 }
+                constrain(redBox) {
+                    top.linkTo(parent.top)
+                    start.linkTo(greenBox.end)
+                    width = Dimension.value(100.dp)
+                    height = Dimension.value(100.dp)
+                }
+
+                createHorizontalChain(greenBox, redBox, chainStyle = ChainStyle.SpreadInside)
+            }
+            ConstraintLayout(constraints, modifier = Modifier.fillMaxSize()) {
+                Box(modifier = Modifier
+                    .background(Color.Green)
+                    .layoutId("greenBox"))
+                Box(modifier = Modifier
+                    .background(Color.Red)
+                    .layoutId("redBox"))
             }
         }
-
-    }
-}
-
-@Composable
-fun Greeting(name: String) {
-    Row( modifier = Modifier
-        .fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically) {
-        Column(
-            modifier = Modifier
-                .fillMaxHeight(0.9f)
-                .background(Color.Green),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceAround
-        )
-        {
-            Text(text = "Hello $name!")
-            Text(text = "Hello World!")
-            Text(text = "Jetpack")
-        }
-        Column(
-            modifier = Modifier
-                .width(200.dp)
-                .height(300.dp)
-                .background(Color.Gray),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceAround
-        )
-        {
-            Text(text = "Hello $name!")
-            Text(text = "Hello World!")
-            Text(text = "Jetpack")
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    ComposeTheme {
-        Greeting(name = "Vyacheslav")
     }
 }
