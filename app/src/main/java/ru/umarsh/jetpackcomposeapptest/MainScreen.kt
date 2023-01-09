@@ -1,7 +1,7 @@
 package ru.umarsh.jetpackcomposeapptest
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -57,7 +57,9 @@ fun MainScreen(
 
         AnimatedVisibility(
             visible = mainViewModel.isCurrentlyDragging,
-            enter = slideInHorizontally(initialOffsetX = { it })
+            enter = fadeIn(animationSpec = tween(1000)),
+            exit = fadeOut(animationSpec = tween(1000))
+            //enter = slideInVertically(initialOffsetY = { it })
         ) {
             DropItem<PersonalItem>(
                 modifier = Modifier.size(Dp(screenWidth / 3.5f))
