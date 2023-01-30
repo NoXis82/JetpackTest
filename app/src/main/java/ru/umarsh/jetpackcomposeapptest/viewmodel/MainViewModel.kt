@@ -1,5 +1,8 @@
 package ru.umarsh.jetpackcomposeapptest.viewmodel
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
@@ -8,90 +11,30 @@ import kotlinx.coroutines.launch
 import ru.umarsh.jetpackcomposeapptest.DefaultDispatchers
 import ru.umarsh.jetpackcomposeapptest.DispatcherProvider
 
-class MainViewModel(
-  private val dispatcher: DispatcherProvider
-) : ViewModel() {
+class MainViewModel : ViewModel() {
 
-    private val _countStateFlow = MutableStateFlow(0)
-    val countStateFlow = _countStateFlow.asStateFlow()
-
-    private val _countSharedFlow = MutableSharedFlow<Int>(replay = 2)
-    val countSharedFlow = _countSharedFlow.asSharedFlow()
-
-    val countDownFlow = flow {
-        val countStart = 10
-        var currentCount = countStart
-        emit(countStart)
-        while (currentCount > 0) {
-            delay(1000L)
-            currentCount--
-            emit(currentCount)
-        }
-    }.flowOn(dispatcher.main)
+    private val flow1 = (1..10).asFlow().onEach { delay(1000L) }
+    private val flow2 = (10..20).asFlow().onEach { delay(400L) }
+    var numberString by mutableStateOf("")
+        private set
 
     init {
-        //collectionFlow()
-        squareNumber(3)
-       // squareNumber(4)
-        viewModelScope.launch(dispatcher.main) {
-            countSharedFlow.collect {
-                delay(2000L)
-                println("FLOW_1: Number: $it")
-            }
-        }
-        viewModelScope.launch(dispatcher.main) {
-            countSharedFlow.collect {
-                delay(3000L)
-                println("FLOW_2: Number: $it")
-            }
-        }
-//        squareNumber(3)
+      //  flow1.zip(flow2) { number1, number2 ->
+      //      numberString += "($number1, $number2)\n"
+      //  }.launchIn(viewModelScope)
+
+    //    merge(flow1, flow2).onEach {
+    //        numberString += "$it\n"
+    //    }.launchIn(viewModelScope)
+
+        flow1.combine(flow2) { num1, num2 ->
+            numberString += "($num1, $num2)\n"
+        }.launchIn(viewModelScope)
+
 
     }
 
-    fun squareNumber(number: Int) {
-        viewModelScope.launch(dispatcher.main) {
-            _countSharedFlow.emit(number * number)
-        }
-    }
 
-    fun incrementCount() {
-        _countStateFlow.value += 1
-    }
-
-    private fun collectionFlow() {
-        val flow = flow {
-            delay(250L)
-            emit("Закуски")
-            delay(1000L)
-            emit("Основное блюдо")
-            delay(100L)
-            emit("Десерт")
-        }
-        viewModelScope.launch {
-            flow.onEach {
-                println("FLOW: $it доставлен")
-            }
-                .buffer()
-                // .conflate()
-                .collect {
-                    println("FLOW: Сейчас едим: $it")
-                    delay(1500L)
-                    println("FLOW: Закончили есть: $it")
-                }
-
-//            countDownFlow
-//                .filter {
-//                    it % 2 == 0
-//                }
-//                .map {
-//                    it * it
-//                }
-//                .collect {
-//                println("Current time: $it")
-//            }
-        }
-    }
 
 
 }
