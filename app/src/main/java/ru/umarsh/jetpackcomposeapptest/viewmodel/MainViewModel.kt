@@ -3,13 +3,16 @@ package ru.umarsh.jetpackcomposeapptest.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.buffer
-import kotlinx.coroutines.flow.conflate
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
+
+    private val _countStateFlow = MutableStateFlow(0)
+    val countStateFlow = _countStateFlow.asStateFlow()
+
+    private val _countSharedFlow = MutableSharedFlow<Int>(replay = 2)
+    val countSharedFlow = _countSharedFlow.asSharedFlow()
 
     val countDownFlow = flow {
         val countStart = 10
@@ -23,7 +26,33 @@ class MainViewModel : ViewModel() {
     }
 
     init {
-        collectionFlow()
+        //collectionFlow()
+        squareNumber(3)
+        squareNumber(4)
+        viewModelScope.launch {
+            countSharedFlow.collect {
+                delay(2000L)
+                println("FLOW_1: Number: $it")
+            }
+        }
+        viewModelScope.launch {
+            countSharedFlow.collect {
+                delay(3000L)
+                println("FLOW_2: Number: $it")
+            }
+        }
+//        squareNumber(3)
+
+    }
+
+    fun squareNumber(number: Int) {
+        viewModelScope.launch {
+            _countSharedFlow.emit(number * number)
+        }
+    }
+
+    fun incrementCount() {
+        _countStateFlow.value += 1
     }
 
     private fun collectionFlow() {
@@ -40,7 +69,7 @@ class MainViewModel : ViewModel() {
                 println("FLOW: $it доставлен")
             }
                 .buffer()
-               // .conflate()
+                // .conflate()
                 .collect {
                     println("FLOW: Сейчас едим: $it")
                     delay(1500L)
