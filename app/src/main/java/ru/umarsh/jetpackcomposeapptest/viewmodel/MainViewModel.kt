@@ -5,8 +5,12 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import ru.umarsh.jetpackcomposeapptest.DefaultDispatchers
+import ru.umarsh.jetpackcomposeapptest.DispatcherProvider
 
-class MainViewModel : ViewModel() {
+class MainViewModel(
+  private val dispatcher: DispatcherProvider
+) : ViewModel() {
 
     private val _countStateFlow = MutableStateFlow(0)
     val countStateFlow = _countStateFlow.asStateFlow()
@@ -23,19 +27,19 @@ class MainViewModel : ViewModel() {
             currentCount--
             emit(currentCount)
         }
-    }
+    }.flowOn(dispatcher.main)
 
     init {
         //collectionFlow()
         squareNumber(3)
-        squareNumber(4)
-        viewModelScope.launch {
+       // squareNumber(4)
+        viewModelScope.launch(dispatcher.main) {
             countSharedFlow.collect {
                 delay(2000L)
                 println("FLOW_1: Number: $it")
             }
         }
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher.main) {
             countSharedFlow.collect {
                 delay(3000L)
                 println("FLOW_2: Number: $it")
@@ -46,7 +50,7 @@ class MainViewModel : ViewModel() {
     }
 
     fun squareNumber(number: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher.main) {
             _countSharedFlow.emit(number * number)
         }
     }
